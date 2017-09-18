@@ -1,6 +1,5 @@
 package interpret;
 
-import static java.awt.SystemColor.text;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
@@ -10,9 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
 
 public class Interpret {
 
@@ -49,9 +45,8 @@ public class Interpret {
 
         String registadorDestino_01111 = null;//R1(a)
         String registadorDestino_01110 = null;//R2(b)
-        String registadorDestino_01100 = null;//R3(c)
-        String primeiroOperando;
-        int soma = 0;
+        String registadorDestino_01100;//R3(c)
+        int soma;
         
         data = br.readLine();//leitura da operação na memoria de programa no arquivo
         PC = br.readLine();//PC = PC + 1;
@@ -76,11 +71,9 @@ public class Interpret {
         data = PC;
         PC = br.readLine();//PC = PC + 1;
         instr_type = data.substring(0,11);//Tipo de operação ( ADD, SUB, MULT, DIV)
-        System.out.println(instr_type.length());
         if(instr_type.contains("00001110101")){//load
             
             registadorDestino_01110 = data.substring(11,16);//Registrador onde será guardado a operação
-            System.out.println(registadorDestino_01110.length());
             if(registadorDestino_01110.contains("01110")){
                 
                 registadorDestino_01110  = br2.readLine();//leitura da memoria de dados no arquivo(variavel B)
@@ -100,10 +93,10 @@ public class Interpret {
             registadorDestino_01100 = data.substring(12,22);//Registrador onde será guardado a operação
             
             if(registadorDestino_01100.contains("1011001101")){
-                soma = Integer.parseInt(registadorDestino_01111,2) + Integer.parseInt(registadorDestino_01110,2);
+                soma = Integer.parseInt(registadorDestino_01111/*A*/,2) + Integer.parseInt(registadorDestino_01110/*B*/,2);
                 //registadorDestino_01100  = 
-                System.out.println("Variável C (binario): "+Integer.toBinaryString(soma));
-                System.out.println("Variável C (decimal): "+soma);
+                System.out.println("Variável Soma (binario): "+Integer.toBinaryString(soma));
+                System.out.println("Variável Soma (decimal): "+soma);
                 escreveArquivo(soma);
             }
             //primeiroOperando = data.substring(17,31);//Primeiro numero da operação
