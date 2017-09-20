@@ -12,22 +12,20 @@ import java.io.OutputStreamWriter;
 
 public class Interpret {
 
-    static String PC;
-    static String instr_type;
-    static String data;
+    static String PC;//proxima linha
+    static String instr_type;//tipo da instrução para analise
+    static String data;//instrução completa de 32bits
     
     public static void main(String[] args) throws IOException {
         abreArquivo();
-
     }
 
-    static void escreveArquivo(int soma) throws IOException {
+    static void escreveArquivo(int soma ) throws IOException {
         OutputStream os = new FileOutputStream("C:\\MemoriaDeDados.txt", true);
         OutputStreamWriter osw = new OutputStreamWriter(os);
         BufferedWriter bw = new BufferedWriter(osw);
         
-        //bw.newLine();
-        bw.write(Integer.toBinaryString(soma));
+        bw.write("0000000000000000000000000000"+Integer.toBinaryString(soma));//fixado para testes...
         bw.newLine();
         bw.close();
     }
@@ -46,17 +44,16 @@ public class Interpret {
         String registadorDestino_01111 = null;//R1(a)
         String registadorDestino_01110 = null;//R2(b)
         String registadorDestino_01100;//R3(c)
-        int soma;
         
         data = br.readLine();//leitura da operação na memoria de programa no arquivo
-        PC = br.readLine();//PC = PC + 1;
+        PC = br.readLine();//PC = data + 1;
         
         System.out.println("Configuração do Sistema: "+data.length()+" bits");
         
-        instr_type = data.substring(0,11);//Tipo de operação ( ADD, SUB, MULT, DIV)
+        instr_type = data.substring(0,11);//Tipo de operação ( Load, Store, Store Half)
         if(instr_type.contains("00001110101")){//load
             
-            registadorDestino_01111 = data.substring(11,16);//Registrador onde será guardado a operação
+            registadorDestino_01111 = data.substring(11,16);//Registrador onde será destinado A
             if(registadorDestino_01111.contains("01111")){
                 
                 registadorDestino_01111  = br2.readLine();//leitura da memoria de dados no arquivo(variavel A)
@@ -64,18 +61,16 @@ public class Interpret {
                 System.out.println("Variável A (decimal): "+Integer.parseInt(registadorDestino_01111,2));
                 
             }
-            //primeiroOperando = data.substring(17,31);//Primeiro numero da operação
         }
         
         instr_type = PC;
         data = PC;
-        PC = br.readLine();//PC = PC + 1;
-        instr_type = data.substring(0,11);//Tipo de operação ( ADD, SUB, MULT, DIV)
+        PC = br.readLine();//PC = data + 1;
+        instr_type = data.substring(0,11);//Tipo de operação ( Load, Store, Store Half)
+        
         if(instr_type.contains("00001110101")){//load
-            
-            registadorDestino_01110 = data.substring(11,16);//Registrador onde será guardado a operação
+            registadorDestino_01110 = data.substring(11,16);//Registrador onde será destinado B
             if(registadorDestino_01110.contains("01110")){
-                
                 registadorDestino_01110  = br2.readLine();//leitura da memoria de dados no arquivo(variavel B)
                 System.out.println("Variável B (binario): "+registadorDestino_01110);
                 System.out.println("Variável B (decimal): "+Integer.parseInt(registadorDestino_01110,2));
@@ -85,36 +80,23 @@ public class Interpret {
         
         instr_type = PC;
         data = PC;
-        PC = br.readLine();//PC = PC + 1;
-        instr_type = data.substring(0,12);//Tipo de operação ( ADD, SUB, MULT, DIV)
+        PC = br.readLine();//PC = data + 1;
+        instr_type = data.substring(0,12);//Tipo de operação ( Load, Store, Store Half)
+        int qtBits;
+        int soma;
         
         if(instr_type.contains("101101011010")){//ADD
-            
-            registadorDestino_01100 = data.substring(12,22);//Registrador onde será guardado a operação
-            
+            registadorDestino_01100 = data.substring(12,22);//Registrador onde será guardado a operação C=A+B
             if(registadorDestino_01100.contains("1011001101")){
                 soma = Integer.parseInt(registadorDestino_01111/*A*/,2) + Integer.parseInt(registadorDestino_01110/*B*/,2);
-                //registadorDestino_01100  = 
                 System.out.println("Variável Soma (binario): "+Integer.toBinaryString(soma));
                 System.out.println("Variável Soma (decimal): "+soma);
-                escreveArquivo(soma);
+               
+                qtBits = 32 - Integer.toBinaryString(soma).length();
+                
+                System.out.println("Qt de bits 0 a esquerda: "+qtBits);
+               escreveArquivo(soma);
             }
-            //primeiroOperando = data.substring(17,31);//Primeiro numero da operação
         }
-                  
-        /*
-       // String segundoOperando  = s.substring(23,31);//Segundo numero da operação
-        soma = Integer.parseInt(primeiroOperando,2) + Integer.parseInt(segundoOperando,2);
-        System.out.println("Soma(decimal) = "+soma);
-        System.out.println("Soma(binario) = "+Integer.toBinaryString(soma));
-        
-        System.out.println(operacao+" "+destinoOperacao+" "+primeiroOperando+" "+segundoOperando);
-        
-        while (data != null) {
-            System.out.println(data);
-
-            data = br.readLine();
-        }
-*/
     }
 }
