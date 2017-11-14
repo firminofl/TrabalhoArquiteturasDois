@@ -15,13 +15,18 @@ public class Interpret {
     static String PC;//proxima linha
     static String instr_type;//tipo da instrução para analise
     static String data;//instrução completa de 32bits
-    
+    static String registadorDestino_01111 = null;//R1(a)
+    static String registadorDestino_01110 = null;//R2(b)
+    static String registadorDestino_01100 = null;//registrador da soma/sub
+    static String registadorDestino;//Register destino(c)
+    static int qtBits;
+    static int soma;
     public static void main(String[] args) throws IOException {
         abreArquivo();
     }
 
     static void escreveArquivo(int soma ) throws IOException {
-        OutputStream os = new FileOutputStream("C:\\MemoriaDeDados.txt", true);
+        OutputStream os = new FileOutputStream("C:\\Users\\aluno.SERVIDORES\\Desktop\\TrabalhoArquitetura\\MemoriaDeDados.txt", true);
         OutputStreamWriter osw = new OutputStreamWriter(os);
         BufferedWriter bw = new BufferedWriter(osw);
         
@@ -40,54 +45,47 @@ public class Interpret {
         InputStream is2 = new FileInputStream("C:\\MemoriaDeDados.txt");
         InputStreamReader isr2 = new InputStreamReader(is2);
         BufferedReader br2 = new BufferedReader(isr2);
-
-        String registadorDestino_01111 = null;//R1(a)
-        String registadorDestino_01110 = null;//R2(b)
-        String registadorDestino_01100;//R3(c)
+        
         
         data = br.readLine();//leitura da operação na memoria de programa no arquivo
         PC = br.readLine();//PC = data + 1;
-        
         System.out.println("Configuração do Sistema: "+data.length()+" bits");
         
-        instr_type = data.substring(0,11);//Tipo de operação ( Load, Store, Store Half)
-        if(instr_type.contains("00001110101")){//load
+        while(data != null){
+            try{
+                instr_type = data.substring(0,11);//Tipo de operação ( Load, Store, add)
+                analisaIntrucao(instr_type,data,br2);
+                data = PC;
+                PC = br.readLine();//PC = data + 1;
+            }catch(NullPointerException e){
+                System.out.println("Não encontramos mais linha de programa!");
+            }
+        }
+    }
+
+    private static void analisaIntrucao(String instr_type, String data, BufferedReader br2) throws IOException {
+        switch(instr_type){
+            case "00001110101"://load
+                System.out.println("LOAD");
+                registadorDestino = data.substring(11,16);//Registrador onde será destinado A
+                
+                if(registadorDestino.contains("01111")){
+                    registadorDestino_01111  = br2.readLine();//leitura da memoria de dados no arquivo(variavel A)
+                    System.out.println("Variável A (binario): "+registadorDestino_01111);
+                    System.out.println("Variável A (decimal): "+Integer.parseInt(registadorDestino_01111,2));
+                
+            }else if(registadorDestino.contains("01110")){//Registrador onde será destinado B
+                    registadorDestino_01110  = br2.readLine();//leitura da memoria de dados no arquivo(variavel B)
+                    System.out.println("Variável B (binario): "+registadorDestino_01110);
+                    System.out.println("Variável B (decimal): "+Integer.parseInt(registadorDestino_01110,2));
+                
+                }
+            break;
             
-            registadorDestino_01111 = data.substring(11,16);//Registrador onde será destinado A
-            if(registadorDestino_01111.contains("01111")){
-                
-                registadorDestino_01111  = br2.readLine();//leitura da memoria de dados no arquivo(variavel A)
-                System.out.println("Variável A (binario): "+registadorDestino_01111);
-                System.out.println("Variável A (decimal): "+Integer.parseInt(registadorDestino_01111,2));
-                
-            }
-        }
-        
-        instr_type = PC;
-        data = PC;
-        PC = br.readLine();//PC = data + 1;
-        instr_type = data.substring(0,11);//Tipo de operação ( Load, Store, Store Half)
-        
-        if(instr_type.contains("00001110101")){//load
-            registadorDestino_01110 = data.substring(11,16);//Registrador onde será destinado B
-            if(registadorDestino_01110.contains("01110")){
-                registadorDestino_01110  = br2.readLine();//leitura da memoria de dados no arquivo(variavel B)
-                System.out.println("Variável B (binario): "+registadorDestino_01110);
-                System.out.println("Variável B (decimal): "+Integer.parseInt(registadorDestino_01110,2));
-                
-            }
-        }
-        
-        instr_type = PC;
-        data = PC;
-        PC = br.readLine();//PC = data + 1;
-        instr_type = data.substring(0,12);//Tipo de operação ( Load, Store, Store Half)
-        int qtBits;
-        int soma;
-        
-        if(instr_type.contains("101101011010")){//ADD
-            registadorDestino_01100 = data.substring(12,22);//Registrador onde será guardado a operação C=A+B
-            if(registadorDestino_01100.contains("1011001101")){
+            case "10110101101"://add
+                System.out.println("ADD");
+                registadorDestino = data.substring(11,22);//Registrador onde será guardado a operação C=A+B
+            if(registadorDestino.contains("1011001101")){
                 soma = Integer.parseInt(registadorDestino_01111/*A*/,2) + Integer.parseInt(registadorDestino_01110/*B*/,2);
                 System.out.println("Variável Soma (binario): "+Integer.toBinaryString(soma));
                 System.out.println("Variável Soma (decimal): "+soma);
@@ -95,8 +93,16 @@ public class Interpret {
                 qtBits = 32 - Integer.toBinaryString(soma).length();
                 
                 System.out.println("Qt de bits 0 a esquerda: "+qtBits);
-               escreveArquivo(soma);
+                
             }
+                
+            break;
+            
+            case "00011111010"://store
+                System.out.println("STORE");
+                escreveArquivo(soma);
+            break;
         }
+    
     }
 }
