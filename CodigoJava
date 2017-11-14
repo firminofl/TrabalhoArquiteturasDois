@@ -26,9 +26,15 @@ public class Interpret {
     }
 
     static void escreveArquivo(int soma ) throws IOException {
-        OutputStream os = new FileOutputStream("C:\\Users\\aluno.SERVIDORES\\Desktop\\TrabalhoArquitetura\\MemoriaDeDados.txt", true);
+        //Memoria de dados
+        OutputStream os = new FileOutputStream("C:\\MemoriaDeDados.txt", true);
         OutputStreamWriter osw = new OutputStreamWriter(os);
         BufferedWriter bw = new BufferedWriter(osw);
+        
+        //Memoria cache
+        OutputStream os2 = new FileOutputStream("C:\\MemoriaCache.txt", true);
+        OutputStreamWriter osw2 = new OutputStreamWriter(os2);
+        BufferedWriter bw2 = new BufferedWriter(osw2);
         
         bw.write("0000000000000000000000000000"+Integer.toBinaryString(soma));//fixado para testes...
         bw.newLine();
@@ -46,7 +52,12 @@ public class Interpret {
         InputStreamReader isr2 = new InputStreamReader(is2);
         BufferedReader br2 = new BufferedReader(isr2);
         
+        //lendo o arquivo de cache
+        InputStream is3 = new FileInputStream("C:\\MemoriaCache.txt");
+        InputStreamReader isr3 = new InputStreamReader(is3);
+        BufferedReader br3 = new BufferedReader(isr3);
         
+       
         data = br.readLine();//leitura da operação na memoria de programa no arquivo
         PC = br.readLine();//PC = data + 1;
         System.out.println("Configuração do Sistema: "+data.length()+" bits");
